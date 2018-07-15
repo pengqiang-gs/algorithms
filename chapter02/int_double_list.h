@@ -1,5 +1,5 @@
-#ifndef ADT_INT_SINGLE_LIST_H
-#define ADT_INT_SINGLE_LIST_H
+#ifndef ADT_INT_DOUBLE_LIST_H
+#define ADT_INT_DOUBLE_LIST_H
 
 typedef int type;
 typedef int position;
