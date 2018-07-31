@@ -3,6 +3,7 @@
 标签 ： 数据结构和算法
 
 ------
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>
 
 ## 数据结构
 
