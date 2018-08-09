@@ -7,18 +7,19 @@ int main(const int argc, const char* argv[])
 	SequentialList l;
 	PositionType index = 0;
 	DataType element;
+	StatusType empty = IS_FALSE;
 
 	printf("testing sequential list start...\n");
 
 	// initialize sequential list.
 	if(FAILED == listInitialize(&l))
 	{
-		printf("initialize list error.\n");
+		printf("initialize sequential list error.\n");
 		return -1;
 	}
 	
 	// insert a element valued 10, into current sequential list.
-	printf("create success, insert a element valued 10 into current sequential list.\n");
+	printf("initialize sequential list success, insert a element valued 10.\n");
 	if(FAILED == listInsert(&l, 0, 10))
 	{
 		printf("insert a element 10 into current sequential list failed!\n");
@@ -42,7 +43,7 @@ int main(const int argc, const char* argv[])
 	{
 		if(FAILED == listGet(l, index, &element))
 		{
-			printf("get element which located in PositionType %d failed.\n", index);
+			printf("get element which located in position %d failed.\n", index);
 			return -1;
 		}
 
@@ -50,9 +51,8 @@ int main(const int argc, const char* argv[])
 	}
 	
 	// check the current sequential list is empty or not, if not, destroy it.
-	StatusType empty = listIsEmpty(l);
-	printf("\ncurrent sequential list is [%s] empty!", (empty == 0) ? "" : "not");
-	if(empty != 0)
+	printf("\ncurrent sequential list is [%s] empty!\n", listIsEmpty(l) == IS_TRUE ? "" : "not");
+	if(listIsEmpty(l) == IS_FALSE)
 	{
 		if(FAILED == listDestroy(&l))
 		{
