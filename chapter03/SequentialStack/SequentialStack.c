@@ -1,21 +1,21 @@
-#include "int_seq_stack.h"
+#include "SequentialStack.h"
 
 #include <stdlib.h>
 
-status init_stack(stack* s)
+StatusType stackInitialize(SequentialStack* s)
 {
-	s->_bottom = (type*)malloc(stack_init_size * sizeof(type));
+	s->_asize = INITIAL_SIZE;
+	s->_bottom = (DataType*)malloc(s->_asize * sizeof(DataType));
 	if(s->_bottom == NULL)
 		return FAILED;
 	
 	s->_top = s->_bottom;
 	s->_size = 0;
-	s->_asize = stack_init_size;
 	
 	return SUCCESS;
 }
 
-status destroy_stack(stack* s)
+StatusType stackDestroy(SequentialStack* s)
 {
 	if(s == NULL || s->_bottom == NULL)
 		return FAILED;
@@ -28,7 +28,7 @@ status destroy_stack(stack* s)
 	return SUCCESS;
 }
 
-status clear_stack(stack* s)
+StatusType stackClear(SequentialStack* s)
 {
 	if(s == NULL || s->_bottom == NULL)
 		return FAILED;
@@ -37,22 +37,22 @@ status clear_stack(stack* s)
 	return SUCCESS;
 }
 
-int is_empty(stack s)
+StatusType stackIsEmpty(SequentialStack s)
 {
 	if(s._size > 0)
-		return FALSE;
+		return IS_FALSE;
 	else
-		return TRUE;
+		return IS_TRUE;
 }
 
-int stack_size(stack s)
+SizeType stackSize(SequentialStack s)
 {
 	return s._size;
 }
 
-status stack_top(stack s, type* e)
+StatusType stackTop(SequentialStack s, DataType* e)
 {
-	if(is_empty(s))
+	if(stackIsEmpty(s))
 	{
 		e = NULL;
 		return FAILED;
@@ -62,9 +62,9 @@ status stack_top(stack s, type* e)
 	return SUCCESS;
 }
 
-status stack_pop(stack* s, type* e)
+StatusType stackPop(SequentialStack* s, DataType* e)
 {
-	if(is_empty(*s))
+	if(FAILED == stackTop(*s, e))
 	{
 		e = NULL;
 		return FAILED;
@@ -72,25 +72,27 @@ status stack_pop(stack* s, type* e)
 	
 	--(s->_top);
 	--(s->_size);
-	*e = *(s->_top);
 	return SUCCESS;
 }
 
-status stack_push(stack* s, type e)
+StatusType stackPush(SequentialStack* s, DataType e)
 {
+	DataType* re = NULL;
+
 	if(s->_size >= s->_asize)
 	{
-		s->_bottom = (type*)realloc(s->_bottom, 
-			(stack_increase_size + s->_asize) * sizeof(type));
+		s->_asize += INCREASE_SIZE;
+		re = (DataType*)realloc(s->_bottom, s->_asize * sizeof(DataType));
 		if(s->_bottom == NULL)
 			return FAILED;
 		
+		s->_bottom = re;
 		s->_top = s->_bottom + s->_size;
-		s->_asize += stack_increase_size;
 	}
 	
 	*(s->_top) = e;
 	++(s->_top);
 	++(s->_size);
+
 	return SUCCESS;
 }

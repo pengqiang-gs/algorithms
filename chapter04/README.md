@@ -1,73 +1,336 @@
-# 串
+# 队列
 
 标签： 数据结构和算法
 
 ---
 
-计算机上的非数值处理的对象基本上就是字符串数据。在汇编和语言的编译环境中，源程序以及目标程序都是字符串数据。但是现今的计算机的硬件结构主要是反映数值计算的需要的，因此在处理字符串数据时比处理整数和浮点数要复杂得多。
-
-## 串类型
-串（string）是由0个或者多个字符组成的有限的序列：
-    ```str = "abcdfeded"```
-其中`str`是串的名称，引号中的是串的数据，`0`个字符的串称为空串。由一个或者多个字符组成的串是**空格串**，不是空串。串的抽象数据类型定义如下：
-
-    ADT string{
-        D: // 数据是字符
-        S: // 每个字符属于串
-        P: // 串的操作
-            init_string(&s, chars); // 用一系列字符初始化串
-            copy_string(&t, s); // 将串s拷贝给串t
-            is_empty(s); //判断串是否为空
-            compare(t, s); // 比较两个串的大小，如果t>s返回TRUE
-            string_size(s); // 返回串的长度
-            clear_string(&s); // 将串清空
-            string_concat(&t, s1, s2); // 合并s1，s2两个串到t
-            sub_string(&t, s, p, l); // 将串s的p开始的l的长度的字串给t
-            string_find(s, t, p); //s中在位置pos之后查找子串t，查找到返回找到的首字符位置，没查到p就为0
-            string_replace(&s, t, v); // 用串v将s中的t串替换
-            string_insert(&s, p, t); // 串s中在位置p插入字串t
-            string_delete(&s, p, l); // 串s中从位置p开始删除l的长度的子串
-            destroy_string(&s); // 销毁串
-    } ADT string;
-
-## 串的实现
-### 定长顺序存储实现
-用一组连续地址的存储单元存储字符串，预先定义足够的长度来存储串，超过预定义长度的部分将发生截断。
+## 队列
+和栈相反，队列（Queue）是一种先进先出`(FIFO, First In First Out)`的线性表。队列只允许在表的一段进行插入，另一端进行删除元素。队列中，允许插入的一端称为队尾（back），允许删除的一端称为队头（front）。抽象数据类型定义：
 ```
-#define max_string_size 255
-typedef unsigned char string[max_string_size+1];
-```
-由于这种做法很不灵活，对于超过`max_string_size`的部分会发生截断，因此这地方不再讨论。
+    ADT Queue{
+        D:
+            // 队列元素
+            [element];
+        S:
+            // 队列长度
+            [size]
+        P：
+            // 初始化一个空队列
+            queueInitialize(&q);
+            
+            // 销毁队列
+            queueDestroy(&q);
+            
+            // 清空队列
+            queueClear(&q);
+            
+            // 判断队列是否为空
+            queueIsEmpty(q);
+            
+            // 获取队列长度
+            queueSize(q);
+            
+            // 获取队列的第一个元素
+            queueFront(q, &e);
+            
+            // 进队
+            enqueue(&q, e);
+            
+            // 出队
+            dequeue(&q, &e);
+    } ADT Queue;
+``` 
 
-### 顺序存储实现
-利用动态分配堆空间的方式，以一组地址连续的存储单元存放串值的字符序列，同时也约定串长度作为存储结构的一部分。
+## 双端队列
+**双端队列**（deque）是一种在队头和队尾两端都可以进行插入和删除的数据结构。这里不做详细描述。
+
+## 队列实现
+和所有的线性表一样，队列也有顺序存储和链式存储两种实现方式。顺序存储的已知的插入/删除弊端（在头部插入/删除元素时，整个线性表其他元素均要后移/前移），同样在队列中也存在，入队只是在队尾插入，出队只是在队头删除（类比现实生活中的排队情况，如果队头出队了，所有人都向对头方向移动一个人的位置）。
+
+### 队列顺序存储实现
+查看[完整代码](https://github.com/pengqiang-gs/algorithms/tree/master/chapter04/SequentialQueue)。
 ```
+// SequentialQueue.h [部分]
+
+#ifndef ADT_SEQUENTIAL_QUEUE_H
+#define ADT_SEQUENTIAL_QUEUE_H
+// declare the sequential queue structure.
 typedef struct {
-    char* _content; // 存放串的内容
-    int _size; // 存放串的长度
-}string;
-```
-基于以上的实现具体细节，请参考[代码](https://github.com/pengqiang-gs/algorithms/tree/master/chapter03/)。
+    // the array elements of sequential queue.
+    DataType* _element;
 
-### 链式存储实现
-和之前的线性表的存储结构类似，串的存储方式也可以使用链式。**教程中说的采用链块的方式这里不推荐使用，尤其是定位子串以及替换子串时性能很低下，同时也很不建议采用串的链式存储实现，因为串就是字符的集合，占用的存储本来就少，如果采用了链式存储，则大大增加了存储开销**。
-```
-// 定义链式的节点node
-typedef struct node{
-    char _ch;
-    struct node* _next;
-}node;
+    // the sequential queue size.
+    SizeType _size;
 
-// 定义string
+    // the alloc space size.
+    SizeType _asize;
+}SequentialQueue;
+
+// method: obtain the first element of sequential queue.
+// input : the instance of sequential queue, the address of value which will be assigned.
+// return: return SUCCESS if succeed, otherwise return FAILED.
+StatusType queueFront(SequentialQueue q, DataType* e);
+
+// method: insert a element into tail of sequential queue.
+// input : the address of sequential queue, the instance of value which will be inserted.
+// return: return SUCCESS if succeed, otherwise return FAILED.
+StatusType enqueue(SequentialQueue* q, DataType e);
+
+// method: delete a element from header of sequential queue.
+// input : the address of sequential queue, the address of value(deleted).
+// return: return SUCCESS if succeed, otherwise return FAILED.
+StatusType dequeue(SequentialQueue* q, DataType* e);
+
+#endif
+```
+```
+// SequentialQueue.c [部分]
+
+
+StatusType queueFront(SequentialQueue q, DataType* e)
+{
+    if(IS_TRUE == queueIsEmpty(q))
+    {
+        e = NULL;
+        return FAILED;
+    }
+
+    *e = *(q._element);
+
+    return SUCCESS;
+}
+
+StatusType enqueue(SequentialQueue* q, DataType e)
+{
+    DataType* re = NULL;
+
+    if(q == NULL || q->_element == NULL)
+        return FAILED;
+
+    if(q->_size >= q->_asize)
+    {
+        // realloc space 
+        q->_asize += INCREASE_SIZE;
+        re = (DataType*)realloc(q->_element, q->_asize * sizeof(DataType));
+        q->_element = re;
+    }
+
+    q->_element[q->_size] = e;
+    ++q->_size;
+
+    return SUCCESS;
+}
+
+StatusType dequeue(SequentialQueue* q, DataType* e)
+{
+    SizeType index = 0;
+
+    if(q == NULL || q->_element == NULL || queueIsEmpty(*q))
+        return FAILED;
+
+    *e = q->_element[0];
+    for(index = 0; index < q->_size - 1; ++index)
+        q->_element[index] = q->_element[index+1];
+    --q->_size;
+
+    return SUCCESS;
+}
+```
+```
+// 测试实例
+//
+// 模拟打印机的作业
+// 
+#include "SequentialQueue.h"
+
+#include <stdio.h>
+
+int main(const int argc, const char* argv[])
+{
+    SequentialQueue q;
+    DataType e;
+
+    printf("print the files which numbered [5, 3, 7] start...\n");
+    printf("initialize printer...\n");
+    if(FAILED == queueInitialize(&q))
+    {
+        printf("printer initialize failed. break!\n");
+        return -1;
+    }
+
+    printf("initialize printer success, add task numbered 5.\n");
+    if(FAILED == enqueue(&q, 5))
+    {
+        printf("add task numbered 5 failed. break!\n");
+        return -1;
+    }
+
+    printf("add task numbered 5 success, current working task: %d\n", queueSize(q));
+    printf("add task numbered 3.\n");
+    if(FAILED == enqueue(&q, 3))
+    {
+        printf("add task numbered 3 failed, break!\n");
+        return -1;
+    }
+
+    printf("add task numbered 3 success, current working task: %d\n", queueSize(q));
+    printf("remove task numbered 5 because it is completed.\n");
+    if(FAILED == dequeue(&q, &e))
+    {
+        printf("remove task numberd 5 failed. break!\n");
+        return -1;
+    }
+
+    printf("remove task numbered 5 success, current working task: %d\n", queueSize(q));
+    printf("add task numbered 7.\n");
+    if(FAILED == enqueue(&q, 7))
+    {
+        printf("add task numbered 7 failed. break!\n");
+        return -1;
+    }
+
+    printf("add task numbered 7 success, current working task: %d\n", queueSize(q));
+    printf("wait...\n");
+    if(FAILED == queueClear(&q))
+    {
+        printf("printer clear task failed. break!\n");
+        return -1;
+    }
+
+    printf("current working task: %d, all task has been completed.\n", queueSize(q));
+    printf("print numbered files finish.\n");
+
+    if(FAILED == queueDestroy(&q))
+    {
+        printf("destroy print queue failed.\n");
+        return -1;
+    }
+
+    return 0;
+}
+```
+```
+// 测试实例输出结果：
+
+print the files which numbered [5, 3, 7] start...
+initialize printer...
+initialize printer success, add task numbered 5.
+add task numbered 5 success, current working task: 1
+add task numbered 3.
+add task numbered 3 success, current working task: 2
+remove task numbered 5 because it is completed.
+remove task numbered 5 success, current working task: 1
+add task numbered 7.
+add task numbered 7 success, current working task: 2
+wait...
+current working task: 0, all task has been completed.
+print numbered files finish.
+```
+
+### 队列链式存储实现
+查看[完整代码](https://github.com/pengqiang-gs/algorithms/tree/master/chapter04/LinkedQueue)。
+
+```
+// LinkedQueue.h [部分]
+
+#ifndef ADT_LINKED_QUEUE_H
+#define ADT_LINKED_QUEUE_H
+
+// declare linked queue node structure.
+typedef struct Node{
+	// element data of linked queue.
+	DataType _element;
+
+	// pointer that point to next node of linked queue.
+	struct Node* _next;
+}Node;
+
+// declate linked queue structure.
 typedef struct {
-    node* _data;
-    int _size;
-}string;
+	// header of linked queue.
+	Node* _front;
+
+	// tail of linked queue.
+	Node* _tail;
+	
+	// size of linked queue.
+	SizeType _size;
+}LinkedQueue;
+
+
+// method: obtain the first element of linked queue and assign it to e.
+// input : the instance of linked queue, the address of value.
+// return: return SUCCESS if succeed, otherwise return FAILED.
+StatusType queueFront(LinkedQueue q, DataType* e);
+
+// method: insert a element into tail of linked queue.
+// input : the address of linked queue, the instance of value which will be inserted.
+// return: return SUCCESS if succeed, otherwise return FAILED.
+StatusType enqueue(LinkedQueue* q, DataType e);
+
+// method: delete a element from header of linked queue.
+// input : the address of linked queue, the address of value(deleted).
+// return: return SUCCESS if succeed, otherwise return FAILED.
+StatusType dequeue(LinkedQueue* q, DataType* e);
+
+#endif
 ```
-基于以上的实现，其实可以根据之前线性表的链式存储实现一样，只是链式节点`node`中的`type`由原来的`int`换成`char`即可，同时实现上述ADT结构中的关于串的一些特殊的接口。具体实现请参考[代码](https://github.com/pengqiang-gs/algorithms/tree/master/chapter03/)。
+```
+// LinkedQueue.c [部分]
 
-## 练习
-### 库实现
-- seq_string
-> 顺序存储实现串ADT
 
+StatusType queueFront(LinkedQueue q, DataType* e)
+{
+	if(e == NULL || queueIsEmpty(q))
+	{
+		e = NULL;
+		return FAILED;
+	}
+	
+	*e = q._front->_next->_element;
+
+	return SUCCESS;
+}
+
+StatusType enqueue(LinkedQueue* q, DataType e)
+{
+	Node* tail = NULL;
+
+	if(q == NULL || q->_front == NULL)
+		return FAILED;
+
+	tail = (Node*)malloc(sizeof(Node));
+	if(tail == NULL)
+		return FAILED;
+
+	tail->_element = e;
+	tail->_next = q->_tail->_next;
+	q->_tail->_next = tail;
+	++(q->_size);
+	
+	return SUCCESS;
+}
+
+StatusType dequeue(LinkedQueue* q, DataType* e)
+{
+	Node* front = NULL;
+
+	if(q == NULL || q->_front == NULL || queueIsEmpty(*q))
+		return FAILED;
+	
+	front = q->_front->_next;
+	*e = front->_element;
+	q->_front->_next = front->_next;
+	free(front);
+	front = NULL;
+	--q->_size;
+
+	return SUCCESS;
+}
+
+```
+```
+// 测试案例同上
+//
+// 输出结果同上
+```

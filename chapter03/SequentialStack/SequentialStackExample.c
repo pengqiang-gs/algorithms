@@ -4,7 +4,7 @@
 // 输入：十进制数(输入负数退出)
 // 输出：八进制数
 // 
-#include "int_seq_stack.h"
+#include "SequentialStack.h"
 
 #include <stdio.h>
 
@@ -12,7 +12,7 @@ int main(const int argc, const char* argv[])
 {
 	int input = 0;
 	
-	while(TRUE)
+	while(1)
 	{
 		printf("请输入一个非负数【输入负数退出】:");
 		scanf("%d", &input);
@@ -20,8 +20,8 @@ int main(const int argc, const char* argv[])
 		if(input < 0)
 			break;
 		
-		stack s;
-		if(FAILED == init_stack(&s))
+		SequentialStack s;
+		if(FAILED == stackInitialize(&s))
 		{
 			printf("init stack failed.\n");
 			return -1;
@@ -29,7 +29,7 @@ int main(const int argc, const char* argv[])
 		
 		while(input)
 		{
-			if(FAILED == stack_push(&s, input % 8))
+			if(FAILED == stackPush(&s, input % 8))
 			{
 				printf("stack push failed.\n");
 				return -1;
@@ -38,9 +38,9 @@ int main(const int argc, const char* argv[])
 			input /= 8;
 		}
 		
-		while(!is_empty(s))
+		while(!stackIsEmpty(s))
 		{
-			if(FAILED == stack_pop(&s, &input))
+			if(FAILED == stackPop(&s, &input))
 			{
 				printf("stack pop failed.\n");
 				return -1;
@@ -49,7 +49,7 @@ int main(const int argc, const char* argv[])
 			printf("%d", input);
 		}
 		
-		if(FAILED == destroy_stack(&s))
+		if(FAILED == stackDestroy(&s))
 		{
 			printf("destroy list failed.\n");
 			return -1;
