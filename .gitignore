@@ -3,3 +3,4 @@ build/*
 
 # ignore vim tags
 ./tags
+tags
