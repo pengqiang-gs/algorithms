@@ -1,0 +1,3 @@
+add_subdirectory(SequentialList)
+add_subdirectory(SinglyLinkedList)
+add_subdirectory(DoubleLinkedList)
